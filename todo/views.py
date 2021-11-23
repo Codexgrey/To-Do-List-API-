@@ -214,10 +214,10 @@ def todo_detail(request, todo_id):
 def list_today(request):
     if request.method == 'GET':
         # getting values for a field in django model
-        thisday = Person.objects.values_list('today', flat=True)
+        thisday = Todo.objects.values_list('today', flat=True)
         data = {today:{
-            "count": Person.objects.filter(today=today).count(),
-            "data": Person.objects.filter(today=today).values()
+            "count": Todo.objects.filter(today=today).count(),
+            "data": Todo.objects.filter(today=today).values()
             } for today in thisday}
         print(thisday)
 

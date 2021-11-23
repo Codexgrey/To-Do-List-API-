@@ -28,7 +28,7 @@ class Todo(models.Model):
     person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name="todolist")
     body = models.TextField()
     when = models.CharField(max_length=20)
-    update = models.DateTimeField(auto_now=True)
+    today = models.CharField(max_length=25, default=get_today())
     date = models.DateTimeField(auto_now_add=True)
     # student = models.OneToOneField(Student, on_delete=models.CASCADE)
 

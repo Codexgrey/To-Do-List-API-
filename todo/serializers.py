@@ -26,6 +26,6 @@ class TodoSerializer(serializers.ModelSerializer):
             "person_name",
             "body", 
             "when",                      
-            "update",
+            "today",
             "date"
         ]

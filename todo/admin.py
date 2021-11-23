@@ -4,9 +4,9 @@ from .models import Person, Todo
 # Register your models here.
 @admin.register(Todo)
 class TodoAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'when']
+    list_display = ['id', 'title', 'when', 'today']
     list_filter = ['date']
-    search_fields = ['title', 'when', 'date']
+    search_fields = ['title', 'when', 'date', 'today']
 
 
 @admin.register(Person)
