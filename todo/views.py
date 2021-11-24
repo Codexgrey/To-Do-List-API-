@@ -105,8 +105,8 @@ def person_detail(request, person_id):
 
     elif request.method == 'DELETE':
         person.delete()
-        context = {"message":"success"}
-        return Response(context, status=status.HTTP_204_NO_CONTENT)
+        context = {"message":"deleted"}
+        return Response(context, status=status.HTTP_202_ACCEPTED)
 
 
 
@@ -205,8 +205,8 @@ def todo_detail(request, todo_id):
 
     elif request.method == 'DELETE':
         todo.delete()
-        context = {"message":"success"}
-        return Response(context, status=status.HTTP_204_NO_CONTENT)
+        context = {"message":"deleted"}
+        return Response(context, status=status.HTTP_202_ACCEPTED)
 
 
 

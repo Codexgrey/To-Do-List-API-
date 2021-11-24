@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import CustomUser
-from .serializers import CustomUserSerializer, ChangePasswordSerializer
+from .serializers import CustomUserSerializer, ChangePasswordSerializer, LoginSerializer
 from rest_framework import status
 from rest_framework import serializers
 from rest_framework.serializers import Serializer
@@ -8,13 +8,70 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from drf_yasg.utils import swagger_auto_schema
+
 # for password authentication
 authentication_classes, permission_classes
+from django.contrib.auth import authenticate
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.hashers import make_password, check_password
 
+
+# checking password
+def password_isvalid(password):
+    #password logic
+    if (len(password) < 6) or (len(password) > 12):
+        isValid = False
+    elif not any(char.isdigit() for char in password): 
+        isValid = False
+    elif not any(char.islower() for char in password):
+        isValid = False
+    elif not any(char.isupper() for char in password):
+        isValid = False
+    else:
+        isValid = True
+
+    return isValid
+
+
+
 # Create your views here.
+# login view
+@swagger_auto_schema(methods=['POST'], request_body=LoginSerializer())
+@api_view(['POST'])
+def user_login(request):
+    if request.method == 'POST':
+        serializer = LoginSerializer(data=request.data)
+
+        if serializer.is_valid():
+            user = authenticate(
+                request, 
+                username=serializer.validated_data['username'], 
+                password=serializer.validated_data['password']
+            )
+
+            if user:
+                if user.is_active:
+                    serializer = CustomUserSerializer(user)
+                    data = {
+                        'message':'Login Successful',
+                        'data':serializer.data
+                    }
+                    return Response(data, status=status.HTTP_200_OK)
+
+                else:
+                    error = {
+                        'message':'Please activate your account',
+                    }
+                    return Response(error, status=status.HTTP_401_UNAUTHORIZED) 
+
+            else:
+                error = {
+                    "errors":serializer.errors
+                }
+                return Response(error, status=status.HTTP_401_UNAUTHORIZED)
+
+
 
 # CustomUser
 # for coreapi; deosn't need 'GET' because it has no request.body
@@ -40,21 +97,33 @@ def user_accounts(request):
 
         # validating data and saving if valid, else = error
         if serializer.is_valid():
-            # hashing password
-            serializer.validated_data['password'] = make_password(
-                serializer.validated_data['password']
-            )
+            # checking password
+            password = serializer.validated_data['password']
 
-            # validated new user is created, unpacked and serialized
-            user = CustomUser.objects.create(**serializer.validated_data)            
-            user_serializer = CustomUserSerializer(user)
+            if password_isvalid(password):
+                # hashing password
+                password = make_password(password)
 
-            # new user sent as data
-            data = {
-                "message": "success",
-                "data": user_serializer.data
-            }
-            return Response(data, status=status.HTTP_201_CREATED)
+                # validated new user is created, unpacked and serialized
+                user = CustomUser.objects.create(**serializer.validated_data)      
+                user_serializer = CustomUserSerializer(user)
+
+                # new user sent as data
+                data = {
+                    "message": "success",
+                    "data": user_serializer.data
+                }
+                return Response(data, status=status.HTTP_201_CREATED)
+
+            else:
+                error = {
+                    "message": "failed",
+                    "errors": [
+                        "Password length should be at least 6 and not more than 8", 
+                        "Password must have lower and uppercase alphabets as well as number(s)"
+                    ]
+                }
+                return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
         else:
             error = {
@@ -132,8 +201,9 @@ def user_detail(request, user_id):
 
     elif request.method == 'DELETE':
         user.delete()
-        context = {"message":"success"}
-        return Response(context, status=status.HTTP_204_NO_CONTENT)
+        context = {"message":"deleted"}
+        return Response(context, status=status.HTTP_202_ACCEPTED)
+
 
 
 # change password
