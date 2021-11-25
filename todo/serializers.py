@@ -1,32 +1,11 @@
 from rest_framework import serializers
-from .models import Person, Todo
-
-
-class PersonSerializer(serializers.ModelSerializer):
-    all_todo = serializers.ReadOnlyField()
-    class Meta:
-        model = Person
-        fields = [  #'__all__'#
-            "id",   
-            "name",
-            "gender",
-            "dob",
-            "today",
-            "all_todo"                     
-        ]        
-
+from .models import Todo
 
 class TodoSerializer(serializers.ModelSerializer):
-    person_name = serializers.ReadOnlyField()
+
     class Meta:
         model = Todo                       
-        fields = [
-            "id",
-            "title",
-            "person",
-            "person_name",
-            "body", 
-            "when",                      
-            "today",
-            "date"
-        ]
+        fields = '__all__'
+
+class FutureSerializer(serializers.Serializer):
+    day = serializers.DateField()

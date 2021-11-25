@@ -1,15 +1,9 @@
 from django.contrib import admin
-from .models import Person, Todo
+from .models import Todo
 
 # Register your models here.
 @admin.register(Todo)
 class TodoAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'when', 'today']
+    list_display = ['id', 'title', 'when', 'day']
     list_filter = ['date']
-    search_fields = ['title', 'when', 'date', 'today']
-
-
-@admin.register(Person)
-class PersonAdmin(admin.ModelAdmin):
-    list_display = ['name', 'today']
-    search_fields = ['name', 'today', 'gender']
+    search_fields = ['title', 'when', 'day',]

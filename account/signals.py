@@ -11,7 +11,7 @@ def send_activate_email(sender, instance, created, **kwargs):
         message = f"""
             Hello, {instance.first_name}.
             Thank you for signing up on our platform.
-            We're happy to have you! 😀🤗😁
+            We're happy to have you! :)
 
 
             Regards, 
