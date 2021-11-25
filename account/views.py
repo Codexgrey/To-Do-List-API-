@@ -39,7 +39,7 @@ def password_isvalid(password):
 # Create your views here.
 # for coreapi; deosn't need 'GET' because it has no request.body
 # user account get and post methods split
-# add user 
+# add user - POST
 @swagger_auto_schema(methods=['POST'], request_body=CustomUserSerializer())
 @api_view(['POST'])
 def add_user(request):
@@ -85,7 +85,7 @@ def add_user(request):
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
 
-# get user - with admin priviledges only 
+# get user - GET (with admin priviledges only) 
 @api_view(['GET'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAdminUser])
@@ -155,7 +155,11 @@ def user_login(request):
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAuthenticated])
 def profile(request):
-    """Allows the logged in user to view their profile, edit or deactivate account. Do not use this view for changing password or resetting password"""
+    """
+    Allows the logged in user to view their profile, 
+    edit or deactivate account. 
+    Do not use this view for changing password or resetting password
+    """
     
     try:
         user = CustomUser.objects.get(id=request.user.id, is_active=True)
@@ -179,7 +183,7 @@ def profile(request):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    #Update the profile of the user
+    # update the profile of the user
     elif request.method == 'PUT':
         serializer = CustomUserSerializer(user, data = request.data, partial=True) 
 
@@ -206,7 +210,7 @@ def profile(request):
 
             return Response(data, status = status.HTTP_400_BAD_REQUEST)
 
-    # delete the account
+    # delete the account by changing `is.active to False`
     elif request.method == 'DELETE':
         user.is_active = False
         user.save()
@@ -289,7 +293,7 @@ def user_detail(request, user_id):
     elif request.method == 'DELETE':
         user.delete()
         context = {"message":"deleted"}
-        return Response(context, status=status.HTTP_202_ACCEPTED)
+        return Response(context, status=status.HTTP_200_OK)
 
 
 

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Person, Todo
 
+
 class PersonSerializer(serializers.ModelSerializer):
     all_todo = serializers.ReadOnlyField()
     class Meta:
