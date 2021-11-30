@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
+from dotenv import load_dotenv
 from pathlib import Path
 from decouple import config
 
@@ -81,6 +82,7 @@ WSGI_APPLICATION = 'todo_api.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+load_dotenv()
 env = os.getenv('ENVIRONMENT', 'development')
 
 if env == 'development': 
