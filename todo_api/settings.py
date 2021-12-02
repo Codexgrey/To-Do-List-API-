@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = ['*']
 # ALLOWED_HOSTS = ['127.0.0.1', 'cg-todo-app.herokuapp.com']
@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'todo.apps.TodoConfig',
     'account.apps.AccountConfig',
@@ -85,7 +84,7 @@ WSGI_APPLICATION = 'todo_api.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 env = os.getenv('ENVIRONMENT', 'development')
 
-if env == 'development': 
+if env=='development': 
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
