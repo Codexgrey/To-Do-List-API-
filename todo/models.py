@@ -15,10 +15,11 @@ class Todo(models.Model):
 
 
     def __str__(self):
-        return self.title
+        return f'{self.title} for {self.user.username}'
 
-    def __str__(self):
-        return f'{self.body} for {self.user.username}'
+    @property
+    def username(self):
+        return self.user.username
     
     def delete(self):
         self.is_active = False
