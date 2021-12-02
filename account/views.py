@@ -16,20 +16,20 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 User = get_user_model()
 
 # checking password
-def password_isvalid(password):
-    #password logic
-    if (len(password) < 6) or (len(password) > 12):
-        isValid = False
-    elif not any(char.isdigit() for char in password): 
-        isValid = False
-    elif not any(char.islower() for char in password):
-        isValid = False
-    elif not any(char.isupper() for char in password):
-        isValid = False
-    else:
-        isValid = True
+# def password_isvalid(password):
+#     #password logic
+#     if (len(password) < 6) or (len(password) > 12):
+#         isValid = False
+#     elif not any(char.isdigit() for char in password): 
+#         isValid = False
+#     elif not any(char.islower() for char in password):
+#         isValid = False
+#     elif not any(char.isupper() for char in password):
+#         isValid = False
+#     else:
+#         isValid = True
 
-    return isValid
+#     return isValid
 
 
 # Create your views here.
@@ -43,36 +43,23 @@ def add_user(request):
     if request.method == 'POST':
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
-            # checking password
             password = serializer.validated_data['password']
 
-            if password_isvalid(password):
-                # hashing password
-                password = make_password(password)
+            # hashing password
+            password = make_password(password)
 
-                # validated new user is created, unpacked and serialized
-                user = User.objects.create(**serializer.validated_data)      
-                serializer = CustomUserSerializer(user)
+            # validated new user is created, unpacked and serialized
+            user = User.objects.create(**serializer.validated_data)      
+            serializer = CustomUserSerializer(user)
 
-                # new user sent as data
-                data = {
-                    "status": True,
-                    "message": "Successful",
-                    "data": serializer.data
-                }
-                return Response(data, status=status.HTTP_201_CREATED)
-
-            else:
-                error = {
-                    "status": False,
-                    "message": "Unsuccessful",
-                    "errors": [
-                        "Password length should be at least 6 and not more than 8", 
-                        "Password must have lower and uppercase alphabets as well as number(s)"
-                    ]
-                }
-                return Response(error, status=status.HTTP_400_BAD_REQUEST)
-
+            # new user sent as data
+            data = {
+                "status": True,
+                "message": "Successful",
+                "data": serializer.data
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
+           
         else:
             error = {
                 "status": False,
@@ -80,6 +67,7 @@ def add_user(request):
                 "errors": serializer.errors
             }
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 # get user - GET (with admin priviledges only) 
