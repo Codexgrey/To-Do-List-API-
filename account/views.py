@@ -41,7 +41,7 @@ def password_isvalid(password):
 def add_user(request):
     """ Allows the user to be able to sign up on the platform """
     if request.method == 'POST':
-        serializer = CustomUserSerializer(data = request.data)
+        serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             # checking password
             password = serializer.validated_data['password']
@@ -52,19 +52,20 @@ def add_user(request):
 
                 # validated new user is created, unpacked and serialized
                 user = User.objects.create(**serializer.validated_data)      
-                user_serializer = CustomUserSerializer(user)
+                serializer = CustomUserSerializer(user)
 
                 # new user sent as data
                 data = {
                     "status": True,
-                    "message": "success",
-                    "data": user_serializer.data
+                    "message": "Successful",
+                    "data": serializer.data
                 }
                 return Response(data, status=status.HTTP_201_CREATED)
 
             else:
                 error = {
-                    "message": "failed",
+                    "status": False,
+                    "message": "Unsuccessful",
                     "errors": [
                         "Password length should be at least 6 and not more than 8", 
                         "Password must have lower and uppercase alphabets as well as number(s)"
