@@ -1,7 +1,4 @@
-from django.shortcuts import render
-from .serializers import CustomUserSerializer, ResetPasswordSerializer, LoginSerializer
-from rest_framework import serializers
-from rest_framework.serializers import Serializer
+from .serializers import CustomUserSerializer, ResetPasswordSerializer
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -12,10 +9,9 @@ from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.signals import user_logged_in
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.exceptions import AuthenticationFailed, ValidationError
+from rest_framework.exceptions import ValidationError
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-    # from django.contrib.auth.signals import user_logged_in
 
 User = get_user_model()
 
@@ -86,7 +82,6 @@ def add_user(request):
 
 
 # get user - GET (with admin priviledges only) 
-@swagger_auto_schema(methods=['GET'], request_body=CustomUserSerializer())
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAdminUser])
 @api_view(['GET'])
@@ -192,7 +187,7 @@ def profile(request):
         
         data = {
                 "status"  : True,
-                "message" : "successful",
+                "message" : "Successful",
                 "data" : serializer.data,
             }
 
@@ -209,9 +204,9 @@ def profile(request):
             serializer.save()
 
             data = {
-                "status"  : True,
-                "message" : "Successful",
-                "data" : serializer.data,
+                "status" : True,
+                "message": "Successful",
+                "data": serializer.data,
             }
 
             return Response(data, status = status.HTTP_201_CREATED)
@@ -240,10 +235,10 @@ def profile(request):
 
 
 # user detail for admin
-@swagger_auto_schema(methods=['PUT', 'DELETE'], request_body=CustomUserSerializer()) 
+@swagger_auto_schema(methods=['DELETE'], request_body=CustomUserSerializer()) 
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAdminUser])
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'DELETE'])
 def user_detail(request, user_id):
     """
         Takes in a user_id and returns the http response depending on the http method
@@ -256,59 +251,35 @@ def user_detail(request, user_id):
     """
 
     try:# get the data from the model
-        user = User.objects.get(id=user_id)
+        user = User.objects.get(id=user_id, is_active=True)
     except User.DoesNotExist:
         error = {
-            "message": "failed",
-            "errors": f"Custom User with id {user_id} does not exist"
+            "status": False,
+            "message": f"Custom User with id {user_id} does not exist"
         }
         return Response(error, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = CustomUserSerializer(user)
-        data = { # prepare response data
-            "message": "success",
+        data = { 
+            # prepare response data
+            "status": True,
+            "message": "Successful",
             "data": serializer.data
         } 
         # send the response
         return Response(data, status=status.HTTP_200_OK) 
 
-    elif request.method == "PUT":
-        # partial allows for patch updates as well
-        serializer = CustomUserSerializer(user, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            # Best Practice;
-            # if 'password' in serializer.validated_data.keys():
-            #   raise ValidationError("Unable to change password")
-            #
-            if "password" in serializer.validated_data:
-                error = {
-                    "message": "failed",
-                    "errors": serializer.errors
-                }
-                return Response(error, status=status.HTTP_403_FORBIDDEN)
-            
-            else:
-                serializer.save()
-
-                data = {
-                    "message": "success",
-                    "data": serializer.data
-                }
-                return Response(data, status=status.HTTP_202_ACCEPTED)
-
-        else:
-            error = {
-                "message": "failed",
-                "errors": serializer.errors
-            }
-            return Response(error, status=status.HTTP_400_BAD_REQUEST)
-
+    # delete the user
     elif request.method == 'DELETE':
-        user.delete()
-        context = {"message":"deleted"}
-        return Response(context, status=status.HTTP_200_OK)
+        user.is_active = False
+        user.save()
+
+        data = {
+            "status": True,
+            "message":"Deleted Successfully"
+            }
+        return Response(data, status=status.HTTP_200_OK)
 
 
 
@@ -325,7 +296,7 @@ def reset_password(request):
         # serializing POST request data
         serializer = ResetPasswordSerializer(data=request.data)
 
-        if serializer.is_valid and serializer.validate_password():
+        if serializer.is_valid:
             old_password = serializer.validated_data['old_password']
 
             if check_password(old_password, user.password):
@@ -333,19 +304,22 @@ def reset_password(request):
                 user.set_password(serializer.validated_data['new_password'])
                 user.save()
 
-                context = {"message": "success"}
-                return Response(context, status=status.HTTP_204_NO_CONTENT)
+                data = {
+                    "status": True,
+                    "message":"Password Change Successful"
+                    }
+                return Response(data, status=status.HTTP_200_OK)
             
             else:
                 error = {
-                    "message": "failed",
-                    "error": "Old pssword not correct"
+                    "status": False,
+                    "message": "Old password not correct"
                 }
                 return Response(error, status=status.HTTP_400_BAD_REQUEST)
         
         else:
             error = {
-                "message": "failed",
+                "status": "False",
                 "errors": serializer.errors
             }
             return Response(error, status=status.HTTP_400_BAD_REQUEST)

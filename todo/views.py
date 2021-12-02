@@ -1,20 +1,14 @@
 from .models import Todo
 from .serializers import TodoSerializer, FutureSerializer
-from rest_framework import status
-from rest_framework import serializers
-from rest_framework.serializers import Serializer
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from drf_yasg.utils import swagger_auto_schema # for coreapi
 from django.utils import timezone
+from drf_yasg.utils import swagger_auto_schema # for coreapi
 
 # for authentication
 from rest_framework import status
-from django.contrib.auth import authenticate
+from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.exceptions import AuthenticationFailed, ValidationError
-from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 # Create your views here.
@@ -30,7 +24,11 @@ def todolist(request):
         objs = Todo.objects.filter(user=request.user)
         serializer = TodoSerializer(objs, many=True)
         
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = {
+            "message":"Success",
+            "data":serializer.data
+        }
+        return Response(data, status=status.HTTP_200_OK)
     
     elif request.method == 'POST':
         serializer =  TodoSerializer(data=request.data)
@@ -39,9 +37,14 @@ def todolist(request):
             if 'user' in serializer.validated_data.keys():
                 serializer.validated_data.pop('user')
                 
-            object = Todo.objects.create(**serializer.validated_data, user=request.user)
-            serializer = TodoSerializer(object)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            todo = Todo.objects.create(**serializer.validated_data, user=request.user)
+            serializer = TodoSerializer(todo)
+
+            data = {
+                "message":"Success",
+                "data":serializer.data
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
         
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -64,15 +67,19 @@ def todo_detail(request, todo_id):
         PUT - Allows you to edit the todo detail
         DELETE - This logic deletes the todo record from the data base
     """
-
     try:# get the data from the model
         todo = Todo.objects.get(id=todo_id)
+
     except Todo.DoesNotExist:
         error = {
-            "message": "failed",
-            "errors": f"Student with id {todo_id} does not exist"
+            "status": False,
+            "message": f"Student with id {todo_id} does not exist"
         }
         return Response(error, status=status.HTTP_404_NOT_FOUND)
+
+    if todo.user != request.user:
+        raise PermissionDenied("You do not have permission to perform this action")
+            
 
     if request.method == 'GET':
         serializer = TodoSerializer(todo)
@@ -93,7 +100,7 @@ def todo_detail(request, todo_id):
 
             data = {
                 "status": True,
-                "message": "success",
+                "message": "Success",
                 "data": serializer.data
             }
             return Response(data, status=status.HTTP_202_ACCEPTED)
@@ -101,7 +108,7 @@ def todo_detail(request, todo_id):
         else:
             error = {
                 "status": False,
-                "message": "failed",
+                "message": "Failed",
                 "errors": serializer.errors
             }
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
@@ -111,7 +118,7 @@ def todo_detail(request, todo_id):
         todo.delete()
         context = {
             "status": True,
-            "message":"deleted"
+            "message":"Deleted Successfully"
             }
         return Response(context, status=status.HTTP_200_OK)
 
