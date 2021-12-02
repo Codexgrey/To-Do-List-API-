@@ -16,9 +16,9 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 # todolist
 # for coreapi; doesn't need 'GET' because it has no request.body
 @swagger_auto_schema(methods=['POST'], request_body=TodoSerializer())
+@api_view(['GET', 'POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAuthenticated])
-@api_view(['GET', 'POST'])
 def todolist(request):
     if request.method == 'GET':
         objs = Todo.objects.filter(user=request.user)
@@ -52,9 +52,9 @@ def todolist(request):
 # todo detail
 # for coreapi; doesn't need 'GET' because it has no request.body
 @swagger_auto_schema(methods=['PUT', 'DELETE'], request_body=TodoSerializer()) 
+@api_view(['GET', 'PUT', 'DELETE'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAuthenticated])
-@api_view(['GET', 'PUT', 'DELETE'])
 def todo_detail(request, todo_id):
     """
         Takes in a todo_id and returns the http response depending on the http method
@@ -124,9 +124,9 @@ def todo_detail(request, todo_id):
 
 
 # list to_do for today
+@api_view(['GET'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAuthenticated])
-@api_view(['GET'])
 def list_today(request):
     if request.method == 'GET':
         # getting values for a field in django model
@@ -144,9 +144,9 @@ def list_today(request):
 
 # list future to_do
 @swagger_auto_schema(method='post', request_body=FutureSerializer())
+@api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAuthenticated])
-@api_view(['POST'])
 def list_future(request):
     if request.method == 'POST':
         serializer = FutureSerializer(data=request.data)
@@ -172,9 +172,9 @@ def list_future(request):
 
 
 # mark to_do complete
+@api_view(['GET'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAuthenticated])
-@api_view(['GET'])
 def mark_complete(request, todo_id):
    
     try:

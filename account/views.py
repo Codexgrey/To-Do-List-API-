@@ -82,9 +82,9 @@ def add_user(request):
 
 
 # get user - GET (with admin priviledges only) 
+@api_view(['GET'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAdminUser])
-@api_view(['GET'])
 def get_user(request):
     """Allows the admin to see all users (both admin and normal users) """
     if request.method == 'GET':
@@ -161,9 +161,9 @@ def user_login(request):
 
 # user profile - get the detail of a single user by their ID
 @swagger_auto_schema(methods=['PUT', 'DELETE'], request_body=CustomUserSerializer())
+@api_view(['GET', 'PUT', 'DELETE'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAuthenticated])
-@api_view(['GET', 'PUT', 'DELETE'])
 def profile(request):
     """
     Allows the logged in user to view their profile, 
@@ -236,9 +236,9 @@ def profile(request):
 
 # user detail for admin
 @swagger_auto_schema(methods=['DELETE'], request_body=CustomUserSerializer()) 
+@api_view(['GET', 'DELETE'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAdminUser])
-@api_view(['GET', 'DELETE'])
 def user_detail(request, user_id):
     """
         Takes in a user_id and returns the http response depending on the http method
@@ -286,9 +286,9 @@ def user_detail(request, user_id):
 # change/reset password
 # for coreapi; deosn't need 'GET' because it has no request.body
 @swagger_auto_schema(methods=['POST'], request_body=ResetPasswordSerializer()) 
+@api_view(['POST'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAuthenticated])
-@api_view(['POST'])
 def reset_password(request):
     if request.method == 'POST':
         # getting logged in user
