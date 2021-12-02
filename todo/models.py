@@ -8,7 +8,7 @@ class Todo(models.Model):
     title = models.CharField(max_length=300)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="todolist")
     body = models.TextField()
-    when = models.DateField(max_length=20, null=True, blank=True)
+    when = models.CharField(max_length=20, null=True, blank=True)
     day = models.DateField(default=now)
     date = models.DateTimeField(auto_now_add=True)
     # student = models.OneToOneField(Student, on_delete=models.CASCADE)

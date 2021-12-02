@@ -1,15 +1,15 @@
 from django.shortcuts import render
-from .models import CustomUser
 from .serializers import CustomUserSerializer, ResetPasswordSerializer, LoginSerializer
 from rest_framework import serializers
 from rest_framework.serializers import Serializer
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
-    # from drf_yasg import openapi
+from drf_yasg import openapi
 
 # for password/user authentication
 from rest_framework import status
-from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth.signals import user_logged_in
 from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
@@ -17,6 +17,7 @@ from rest_framework.authentication import BasicAuthentication, TokenAuthenticati
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
     # from django.contrib.auth.signals import user_logged_in
 
+User = get_user_model()
 
 # checking password
 def password_isvalid(password):
@@ -54,7 +55,7 @@ def add_user(request):
                 password = make_password(password)
 
                 # validated new user is created, unpacked and serialized
-                user = CustomUser.objects.create(**serializer.validated_data)      
+                user = User.objects.create(**serializer.validated_data)      
                 user_serializer = CustomUserSerializer(user)
 
                 # new user sent as data
@@ -85,13 +86,14 @@ def add_user(request):
 
 
 # get user - GET (with admin priviledges only) 
+@swagger_auto_schema(methods=['GET'], request_body=CustomUserSerializer())
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAdminUser])
 @api_view(['GET'])
 def get_user(request):
     """Allows the admin to see all users (both admin and normal users) """
     if request.method == 'GET':
-        user = CustomUser.objects.filter(is_active=True)
+        user = User.objects.filter(is_active=True)
 
         serializer = CustomUserSerializer(user, many =True)
         data = {
@@ -104,9 +106,13 @@ def get_user(request):
 
 
 # login view
-@swagger_auto_schema(method='post', request_body=LoginSerializer())
-@authentication_classes([BasicAuthentication])
-@permission_classes([IsAuthenticated])
+@swagger_auto_schema(method='POST', request_body=openapi.Schema(
+    type=openapi.TYPE_OBJECT, 
+    properties={
+        'username': openapi.Schema(type=openapi.TYPE_STRING, description='string'),
+        'password': openapi.Schema(type=openapi.TYPE_STRING, description='string'),
+    }
+))
 @api_view(['POST'])
 def user_login(request):
     
@@ -116,37 +122,45 @@ def user_login(request):
     Check settings for token life time.
     """
     
-    if request.method == 'POST':
-        serializer = LoginSerializer(data=request.data)
+    if request.method=='POST':
+        user = authenticate(request, username=request.data['username'], password=request.data['password'])
+        
+        if user is not None:
+            if user.is_active==True:
+                try:
+                    user_detail = {}
+                    user_detail['id'] = user.id
+                    user_detail['first_name'] = user.first_name
+                    user_detail['last_name'] = user.last_name
+                    user_detail['email'] = user.email
+                    user_detail['username'] = user.username
+                    
+                    user_logged_in.send(sender=user.__class__,
+                                        request=request, user=user)
 
-        if serializer.is_valid():
-            user = authenticate(
-                request, 
-                username=serializer.validated_data['username'], 
-                password=serializer.validated_data['password']
-            )
-
-            if user:
-                if user.is_active:
-                    serializer = CustomUserSerializer(user)
                     data = {
-                        "status": True,
-                        "message":'Login Successful',
-                        "data":serializer.data
+                        'status'  : True,
+                        'message' : 'Successful',
+                        'data' : user_detail
                     }
                     return Response(data, status=status.HTTP_200_OK)
-
-                else:
-                    error = {
-                        "message":'Please activate your account',
-                    }
-                    return Response(error, status=status.HTTP_403_FORBIDDEN) 
+                
+                except Exception as e: 
+                    raise e
 
             else:
-                error = {
-                    "errors":serializer.errors
+                data = {
+                    'status': False,
+                    'error': 'This account has not been activated'
                 }
-                return Response(error, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(data, status=status.HTTP_403_FORBIDDEN)
+
+        else:
+            data = {
+                'status': False,
+                'error': 'Please provide a valid username and a password'
+            }
+            return Response(data, status=status.HTTP_401_UNAUTHORIZED)
 
 
 
@@ -163,9 +177,9 @@ def profile(request):
     """
     
     try:
-        user = CustomUser.objects.get(id=request.user.id, is_active=True)
+        user = User.objects.get(id=request.user.id, is_active=True)
     
-    except CustomUser.DoesNotExist:
+    except User.DoesNotExist:
         data = {
                 "status"  : False,
                 "message" : "Does not exist"
@@ -242,8 +256,8 @@ def user_detail(request, user_id):
     """
 
     try:# get the data from the model
-        user = CustomUser.objects.get(id=user_id)
-    except CustomUser.DoesNotExist:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
         error = {
             "message": "failed",
             "errors": f"Custom User with id {user_id} does not exist"
