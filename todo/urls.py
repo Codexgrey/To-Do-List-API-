@@ -6,5 +6,5 @@ urlpatterns = [
     path('todolist/<int:todo_id>', views.todo_detail),
     path('todos/mark_complete/<int:todo_id>', views.mark_complete),
     path('todos/today/', views.list_today),
-    path('todos/anydate/', views.list_future),
+    path('todos/anyfuturedate/', views.list_future),
 ]

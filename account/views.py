@@ -105,6 +105,8 @@ def get_user(request):
 
 # login view
 @swagger_auto_schema(method='post', request_body=LoginSerializer())
+# @authentication_classes([BasicAuthentication])
+# @permission_classes([IsAuthenticated])
 @api_view(['POST'])
 def user_login(request):
     
