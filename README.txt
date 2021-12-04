@@ -1,10 +1,10 @@
-# To VIEW DEPLOYMENT 
+### To VIEW DEPLOYMENT 
 Visit - https://cg-todo-app.herokuapp.com/
 
-# INSTALL ALL APP DEPENDENCIES
+### INSTALL ALL APP DEPENDENCIES
 - pip install -r requirements.txt
 
-# RUN APP
+### RUN APP
 - python manage.py runserver
 
 
