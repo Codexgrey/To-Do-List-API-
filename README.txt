@@ -1,7 +1,7 @@
 ### To VIEW DEPLOYMENT 
 Visit - https://cg-todo-app.herokuapp.com/
 
-### Avaliable
+### After cloning/forking
 
 In the project directory, you can run:
 
