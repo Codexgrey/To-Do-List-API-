@@ -119,7 +119,9 @@ def user_login(request):
     """
     
     if request.method=='POST':
-        user = authenticate(request, username=request.data['username'], password=request.data['password'])
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
         
         if user is not None:
             if user.is_active==True:
@@ -130,9 +132,10 @@ def user_login(request):
                     user_detail['last_name'] = user.last_name
                     user_detail['email'] = user.email
                     user_detail['username'] = user.username
+                    user_detail['address'] = user.address
+                    user_detail['date_joined'] = user.date_joined
                     
-                    user_logged_in.send(sender=user.__class__,
-                                        request=request, user=user)
+                    user_logged_in.send(sender=user.__class__, request=request, user=user)
 
                     data = {
                         'status'  : True,
