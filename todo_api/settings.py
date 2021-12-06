@@ -27,8 +27,8 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.herokuapp.com']
-# ALLOWED_HOSTS = ['127.0.0.1', 'cg-todo-app.herokuapp.com'] or [*]
+ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'cg-todo-app.herokuapp.com'] or [*]
 
 
 # Application definition

@@ -11,16 +11,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     
     class Meta: 
         model = User
-        fields = [ #'__all__'
-            'id',
-            'first_name', 
-            'last_name', 
-            'username', 
-            'email', 
-            'address', 
-            'password', 
-            'is_active'
-        ]
+        fields = '__all__'
 
 # since we aren't using ModelSerializer, we create our own fields
 class ResetPasswordSerializer(serializers.Serializer):
