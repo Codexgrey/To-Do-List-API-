@@ -123,11 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly'
-    ],
-}
+
 
 # Extended user model auth
 AUTH_USER_MODEL = 'account.CustomUser'

@@ -110,7 +110,6 @@ def get_user(request):
     }
 ))
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def user_login(request):
     
     """
