@@ -12,14 +12,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta: 
         model = User
         fields = [ #'__all__'
-            'id',
-            'first_name', 
-            'last_name', 
-            'username', 
-            'email',  
-            'password', 
-            'is_active', 
-            'date_joined'
+            "id",
+            "username", 
+            "first_name", 
+            "last_name", 
+            "email",  
+            "password", 
+            "is_active",
+            "address", 
+            "date_joined"
         ]
 
 # since we aren't using ModelSerializer, we create our own fields

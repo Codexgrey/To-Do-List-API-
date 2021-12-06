@@ -6,6 +6,7 @@ import uuid
 class CustomUser(AbstractUser):
     # Extending the user model
     id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
+    address = models.TextField(null=True, blank=True)
     
     def __str__(self):
         return self.username
