@@ -19,8 +19,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'email', 
             'address', 
             'password', 
-            'is_active', 
-            'date_joined'
+            'is_active'
         ]
 
 # since we aren't using ModelSerializer, we create our own fields
