@@ -12,6 +12,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta: 
         model = User
         fields = [ #'__all__'
+            'id',
             'first_name', 
             'last_name', 
             'username', 
@@ -21,8 +22,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'is_active', 
             'date_joined'
         ]
-
-
 
 # since we aren't using ModelSerializer, we create our own fields
 class ResetPasswordSerializer(serializers.Serializer):
